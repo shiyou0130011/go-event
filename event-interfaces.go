@@ -11,7 +11,7 @@ type Event interface {
 }
 
 type EventTarget interface {
-	AddEventListener(eventName string, listener Listener) bool
-	RemoveEventListener(eventName string, listener Listener) bool
+	AddEventListener(eventName string, listener Listener)
+	RemoveEventListener(eventName string, listener Listener)
 	DispatchEvent(e Event) bool
 }
