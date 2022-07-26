@@ -64,9 +64,9 @@ func (t *BasicEventTarget) DispatchEvent(e NonDispatchedEvent) bool {
 	eventName := e.Type()
 
 	event := BasicEvent{
-		NonDispatchedEvent: e,
-		timestamp:          time.Now(),
-		target:             t,
+		Original:  e,
+		timestamp: time.Now(),
+		target:    t,
 	}
 
 	for _, listener := range t.listeners[eventName] {
