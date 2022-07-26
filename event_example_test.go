@@ -1,7 +1,6 @@
 package event_test
 
 import (
-	"fmt"
 	"log"
 
 	event "github.com/shiyou0130011/go-event"
@@ -16,7 +15,7 @@ func (e SampleEvent) Type() string {
 func Example() {
 	target := &event.BasicEventTarget{}
 	target.AddEventListener("foo", func(e event.Event) bool {
-		fmt.Println("Dispatch foo event")
+		log.Println("Dispatch foo event")
 		return true
 	})
 	target.AddEventListener("foo", func(e event.Event) bool {
@@ -27,6 +26,5 @@ func Example() {
 	target.DispatchEvent(SampleEvent("foo"))
 
 	// Output:
-	// Dispatch foo event
 	//
 }
