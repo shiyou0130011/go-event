@@ -6,9 +6,13 @@ import (
 )
 
 type BasicEvent struct {
-	NonDispatchedEvent
+	Original  NonDispatchedEvent
 	target    EventTarget
 	timestamp time.Time
+}
+
+func (e BasicEvent) Type() string {
+	return e.Original.Type()
 }
 
 func (e BasicEvent) Target() EventTarget {
