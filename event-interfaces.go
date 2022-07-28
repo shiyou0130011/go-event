@@ -9,6 +9,15 @@ type NonDispatchedEvent interface {
 	Type() string
 }
 
+// An event which can set whether it is cancelable.
+//
+// When an EventTarget dispatches a CancelableEvent (with Cancelable() = true) and one of the listeners return false,
+// other listeners will not be executed .
+type CancelableEvent interface {
+	NonDispatchedEvent
+	Cancelable() bool
+}
+
 // A dispatched event
 type Event interface {
 	NonDispatchedEvent

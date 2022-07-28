@@ -62,6 +62,10 @@ func (t *BasicEventTarget) RemoveEventListener(eventName string, listener Listen
 
 func (t *BasicEventTarget) DispatchEvent(e NonDispatchedEvent) bool {
 	eventName := e.Type()
+	var cancelable = false
+	if ce, isCancelableEvent := e.(CancelableEvent); isCancelableEvent {
+		cancelable = ce.Cancelable()
+	}
 
 	event := BasicEvent{
 		Original:  e,
@@ -70,7 +74,10 @@ func (t *BasicEventTarget) DispatchEvent(e NonDispatchedEvent) bool {
 	}
 
 	for _, listener := range t.listeners[eventName] {
-		listener(event)
+		result := listener(event)
+		if cancelable && !result {
+			return false
+		}
 	}
 	return true
 }
