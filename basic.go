@@ -2,6 +2,7 @@ package event
 
 import (
 	"reflect"
+	"sync"
 	"time"
 )
 
@@ -60,8 +61,8 @@ func (t *BasicEventTarget) RemoveEventListener(eventName string, listener Listen
 	}
 }
 
-func (t *BasicEventTarget) DispatchEvent(e NonDispatchedEvent) bool {
-	eventName := e.Type()
+func (t *BasicEventTarget) DispatchEvent(e NonDispatchedEvent) (result bool) {
+	result = true
 	var cancelable = false
 	if ce, isCancelableEvent := e.(CancelableEvent); isCancelableEvent {
 		cancelable = ce.Cancelable()
@@ -73,11 +74,39 @@ func (t *BasicEventTarget) DispatchEvent(e NonDispatchedEvent) bool {
 		target:    t,
 	}
 
-	for _, listener := range t.listeners[eventName] {
-		result := listener(event)
-		if cancelable && !result {
-			return false
+	list, has := t.listeners[e.Type()]
+	if !has || len(list) == 0 {
+		return
+	}
+
+	if cancelable {
+		result = t.dispatchCancelableEvent(event)
+	} else {
+		t.dispatchNonCancelableEvent(event)
+	}
+
+	return
+}
+
+func (t *BasicEventTarget) dispatchCancelableEvent(e Event) (result bool) {
+	for _, listener := range t.listeners[e.Type()] {
+		result = listener(e)
+		if !result {
+			return
 		}
 	}
-	return true
+	return
+}
+
+func (t *BasicEventTarget) dispatchNonCancelableEvent(e Event) {
+	var wg sync.WaitGroup
+	for _, listener := range t.listeners[e.Type()] {
+		wg.Add(1)
+		go (func(l Listener) {
+			defer wg.Done()
+
+			l(e)
+		})(listener)
+	}
+	wg.Wait()
 }
